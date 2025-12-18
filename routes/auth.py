@@ -7,15 +7,21 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email')
+        login_input = request.form.get('email')  # Can be email or username
         password = request.form.get('password')
-        user = User.query.filter_by(email=email).first()
+        
+        # Try to find user by email or username
+        user = User.query.filter(
+            (User.email == login_input) | (User.username == login_input)
+        ).first()
         
         if user and user.check_password(password):
             login_user(user)
-            return redirect(url_for('main.index'))
+            if user.is_admin:
+                return redirect(url_for('admin.index'))
+            return redirect(url_for('dashboard.index'))
         else:
-            flash('Invalid email or password.')
+            flash('Invalid email/username or password.')
     return render_template('login.html')
 
 @auth_bp.route('/signup', methods=['GET', 'POST'])
@@ -25,8 +31,12 @@ def signup():
         email = request.form.get('email')
         password = request.form.get('password')
         
+        # Check if email already exists
         if User.query.filter_by(email=email).first():
             flash('Email already exists.')
+        # Check if username already exists
+        elif User.query.filter_by(username=username).first():
+            flash('Username already exists.')
         else:
             new_user = User(username=username, email=email)
             new_user.set_password(password)
