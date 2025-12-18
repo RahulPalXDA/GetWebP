@@ -24,11 +24,11 @@ def init_db():
     with app.app_context():
         db.create_all()
         if not User.query.filter_by(is_admin=True).first():
-            admin = User(username='admin', email='admin', is_admin=True, is_approved=True, is_unlimited=True)
+            admin = User(username='admin', email='admin@admin.com', is_admin=True, is_approved=True, is_unlimited=True)
             admin.set_password('admin@1234')
             db.session.add(admin)
             db.session.commit()
-            print("Super Admin created: email=admin, password=admin@1234")
+            print("Super Admin created: email=admin@admin.com, password=admin@1234")
 
 # --- Blueprints ---
 from routes.main import main_bp
